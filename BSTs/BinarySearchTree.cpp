@@ -35,12 +35,14 @@ public:
 
    void Burn(){
        Clear(root);
-       root = nullptr;
+       this->root = nullptr;
     }
 
     void Insert(TreeNode<ValueType> *&raiz, const ValueType& elementToInsert){
        if(raiz == nullptr){
           raiz = new TreeNode<ValueType>(elementToInsert);
+          if(this->count == 0)
+            this->root = raiz;
           (this->count)++;
        }
        else if(elementToInsert < raiz->key) Insert(raiz->left, elementToInsert);
@@ -158,5 +160,6 @@ int main(){
    else cout << "False\n";
    //b.InOrder(k);
    b.InLevel(k);
+   b.Burn();
    return 0;
 }
