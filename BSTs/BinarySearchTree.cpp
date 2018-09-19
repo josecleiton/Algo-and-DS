@@ -29,8 +29,8 @@ private:
    size_t count{};
 public:
 
-    ~BinarySearchTree(){
-       Burn();
+    ~BinarySearchTree(){ //destructor
+       Burn(); //queima a porra toda
     }
 
    void Burn(){
@@ -77,9 +77,43 @@ public:
     TreeNode<ValueType>* GetRootNode() const{
        return this->root;
     }
+    
+    TreeNode<ValueType>* MinValue(TreeNode<ValueType> *&root){
+        TreeNode<ValueType>* aux = root;
+        while(aux->left != nullptr)
+            aux = aux->left;
+        return aux;
+            
+    }
 
     /// Remove o elemento
-    bool Remove(const ValueType& elementToRemove);
+private:
+    bool Remove(TreeNode<ValueType> *&NodeToRemove){
+        if(NodeToRemove != nullptr){
+            TreeNode<ValueType>* AuxNode = NodeToRemove;
+            if(NodeToRemove->left == nullptr) NodeToRemove = NodeToRemove->right;
+            else if(NodeToRemove->right == nullptr) NodeToRemove = NodeToRemove->left;
+            else{
+                TreeNode<ValueType>* AuxNode = MinValue(NodeToRemove->right);
+                NodeToRemove->key = AuxNode->key;
+                Remove(AuxNode);
+                return true;
+            }
+            delete AuxNode;
+            return true;
+        }
+        return false;
+    }
+    
+public:
+    bool FindAndRemove(const ValueType& elementToFind){
+        TreeNode<ValueType>* NodeFound = Search(this->root, elementToFind);
+        bool removed = false;
+        if(NodeFound != nullptr)
+            removed = Remove(NodeFound);
+        return removed;
+    }
+        
 
     /// Busca pelo elemento
     TreeNode<ValueType>*& Search(TreeNode<ValueType> *&root, const ValueType& elementToFind) const{
@@ -98,7 +132,7 @@ public:
 
     /// Numero de nós
     size_t Count() const{
-       return count;
+       return this->count;
     }
 
     void PreOrder(TreeNode<ValueType> *&root) const{
@@ -147,19 +181,19 @@ public:
 
 };
 int main(){
-   BinarySearchTree<int> b;
-   auto k = b.GetRootNode();
-   b.Insert(k, 4);
-   b.Insert(k, 5);
-   b.Insert(k, 1);
+   BinarySearchTree<int> BST;
+   auto k = BST.GetRootNode();
+   BST.Insert(k, 4);
+   BST.Insert(k, 5);
+   BST.Insert(k, 1);
+   BST.FindAndRemove(1);
 
-   cout << "Nós na árvore: " << b.Count() << '\n';
-   cout << "Altura da árvore: " << b.Height(k) << '\n';
+   cout << "Nós na árvore: " << BST.Count() << '\n';
+   cout << "Altura da árvore: " << BST.Height(k) << '\n';
    cout << "Arvore Balanceada: ";
-   if(b.IsBalanced(k)) cout << "True\n";
+   if(BST.IsBalanced(k)) cout << "True\n";
    else cout << "False\n";
    //b.InOrder(k);
-   b.InLevel(k);
-   b.Burn();
+   BST.InLevel(k);
    return 0;
 }
