@@ -18,8 +18,8 @@ class TreeNode{
       key(input), left(nullptr), right(nullptr) {
    }
    TreeNode():
-      left(nullptr),
-      right(nullptr){}
+      left(nullptr), right(nullptr){
+   }
 };
 
 template <class ValueType>
@@ -58,16 +58,16 @@ public:
        long long leftHeight = Height(root->left);
        long long rightHeight = Height(root->right);
        
-       if ((abs(leftHeight-rightHeight)<=1) and isBalanced(root->left) and isBalanced(root->right))
+       if ((abs(leftHeight-rightHeight)<=1) and IsBalanced(root->left) and IsBalanced(root->right))
           return true;
        else return false;
     }
 
-    bool isMirror(TreeNode<ValueType> *&root1, TreeNode<ValueType> *&root2){
+    bool IsMirror(TreeNode<ValueType> *&root1, TreeNode<ValueType> *&root2){
        if(root1 == nullptr and root2 == nullptr)
           return true;
        if(root1 != nullptr and root2 != nullptr)
-          return isMirror(root1->left, root2->right) and isMirror(root1->right, root2->left);
+          return IsMirror(root1->left, root2->right) and IsMirror(root1->right, root2->left);
        
        return false;
     }
@@ -151,8 +151,11 @@ int main(){
    b.Insert(k, 5);
    b.Insert(k, 1);
 
-   cout << "Nós na árvore: "<< b.Count()<<'\n';
+   cout << "Nós na árvore: " << b.Count() << '\n';
    cout << "Altura da árvore: " << b.Height(k) << '\n';
+   cout << "Arvore Balanceada: ";
+   if(b.IsBalanced(k)) cout << "True\n";
+   else cout << "False\n";
    //b.InOrder(k);
    b.InLevel(k);
    return 0;
