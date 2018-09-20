@@ -1,11 +1,7 @@
 #include <iostream>
 #include <memory>
-#include <vector>
-#include <stack>
 #include <queue>
-#include <list>
 #include <algorithm>
-#include <numeric>
 using namespace std;
 
 template <class ValueType>
@@ -90,28 +86,47 @@ public:
 private:
     bool Remove(TreeNode<ValueType> *&NodeToRemove){
         if(NodeToRemove != nullptr){
-            TreeNode<ValueType>* AuxNode = NodeToRemove;
+            auto AuxNode = NodeToRemove;
             if(NodeToRemove->left == nullptr) NodeToRemove = NodeToRemove->right;
             else if(NodeToRemove->right == nullptr) NodeToRemove = NodeToRemove->left;
             else{
-                TreeNode<ValueType>* AuxNode = MinValue(NodeToRemove->right);
+                auto AuxNode = MinValue(NodeToRemove->right);
                 NodeToRemove->key = AuxNode->key;
                 Remove(AuxNode);
                 return true;
             }
             delete AuxNode;
+            (this->count)--;
+            AuxNode = nullptr;
             return true;
         }
         return false;
     }
     
 public:
-    bool FindAndRemove(const ValueType& elementToFind){
-        TreeNode<ValueType>* NodeFound = Search(this->root, elementToFind);
-        bool removed = false;
-        if(NodeFound != nullptr)
-            removed = Remove(NodeFound);
-        return removed;
+    TreeNode<ValueType>* FindAndRemove(TreeNode<ValueType> *&NodeToRemove,const ValueType& elementToRemove){
+        if(NodeToRemove != nullptr){
+                if(elementToRemove < NodeToRemove->key) NodeToRemove->left = FindAndRemove(NodeToRemove->left, elementToRemove);
+                else if(elementToRemove > NodeToRemove->key) NodeToRemove->right = FindAndRemove(NodeToRemove->right, elementToRemove);
+                else{
+                    (this->count)--; //diminui um do numero de nós
+                    if(NodeToRemove->left == nullptr){
+                        auto AuxNode = NodeToRemove->right;
+                        delete NodeToRemove;
+                        return AuxNode;
+                    }
+                    else if(NodeToRemove->right == nullptr){
+                        auto AuxNode = NodeToRemove->left;
+                        delete NodeToRemove;
+                        return AuxNode;
+                    }
+
+                    auto AuxNode = MinValue(NodeToRemove->right);
+                    NodeToRemove->key = AuxNode->key;
+                    NodeToRemove->right = FindAndRemove(NodeToRemove->right, AuxNode->key);
+                }
+        }
+        return nullptr;
     }
         
 
@@ -185,8 +200,10 @@ int main(){
    auto k = BST.GetRootNode();
    BST.Insert(k, 4);
    BST.Insert(k, 5);
+   BST.Insert(k, 3);
+   BST.Insert(k, 2);
    BST.Insert(k, 1);
-   BST.FindAndRemove(1);
+   BST.FindAndRemove(k, 4);
 
    cout << "Nós na árvore: " << BST.Count() << '\n';
    cout << "Altura da árvore: " << BST.Height(k) << '\n';
