@@ -18,6 +18,7 @@ class DynamicStruct{
 
    void Insert();
    friend ostream &operator <<(ostream &out, const DynamicStruct &Other);
+   friend bool operator==(const DynamicStruct &This, const DynamicStruct &Other);
 };
 
 class Record{

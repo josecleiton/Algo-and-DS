@@ -55,7 +55,7 @@ void DynamicStruct::Insert(){
       if(type == "string"){
          cin.ignore();
          getline(cin, value);
-      }
+     }
       else cin >> value;
       
       this->Name = name;
@@ -104,6 +104,12 @@ ostream &operator <<(ostream &out, const DynamicStruct &Other){
    }
    out << endl;
    return out;
+}
+
+bool operator==(const DynamicStruct &This, const DynamicStruct &Other){
+   if(This.Name == Other.Name and This.Type == Other.Type)
+      return true;
+   return false;
 }
 
 void ClearWindow(){
