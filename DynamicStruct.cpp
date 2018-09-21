@@ -1,4 +1,14 @@
 #include "DynamicStruct.hpp"
+#include <algorithm>
+#ifndef LIB
+#define LIB
+
+#include <iostream>
+#include <list>
+#include <string>
+#include <cstring>
+
+#endif
 
 using namespace std;
 
@@ -42,6 +52,21 @@ void Record::AreUSure(){
    cin >> op;
    if(op == 'S' or op == 's') Burn();
    else cout << "Lúcido!" << endl;
+}
+
+void Record::RemoveByName(){
+   string name;
+   cout << "Qual o nome do campo que você deseja excluir? ";
+   cin.ignore();
+   getline(cin, name);
+   for(list<DynamicStruct*>::iterator it = this->Values.begin(); it != this->Values.end(); it++){
+      if((*it)->Name == name){
+	this->Values.erase(it);
+	cout << "Elemento removido com sucesso. " << endl;
+      }
+   }
+   cout << "Elemento não foi encontrado. " << endl;
+   Pause();
 }
 
 void DynamicStruct::Insert(){
@@ -146,6 +171,10 @@ int Menu(){
 
          case '3':
             Records.FindByName();
+         break;
+         
+         case '4':
+            Records.RemoveByName();
          break;
 
          case '5':

@@ -1,5 +1,7 @@
 #ifndef DYNAMIC
 #define DYNAMIC
+
+#define LIB
 #include <iostream>
 #include <list>
 #include <string>
@@ -19,6 +21,8 @@ class DynamicStruct{
    void Insert();
    friend ostream &operator <<(ostream &out, const DynamicStruct &Other);
    friend bool operator==(const DynamicStruct &This, const DynamicStruct &Other);
+   private:
+     void Remove();
 };
 
 class Record{
@@ -30,6 +34,7 @@ public:
    void MergeAndInsert();
    void FindByName();
    void AreUSure(); // Pergunta antes de destruir o registro
+   void RemoveByName();
 private:
    DynamicStruct* Search(string elementToFind) const;
    void Burn();
