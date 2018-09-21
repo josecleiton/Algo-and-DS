@@ -22,11 +22,26 @@ void Record::FindByName(){
    cin.ignore();
    getline(cin, elementToFind);
    auto Found = this->Search(elementToFind);
-   if(Found != nullptr){
+   if(Found != nullptr)
       cout << endl << *Found << endl;
-      Pause();
-   }
    else cout << "Elemento não foi encontrado!" << endl;
+   Pause();
+}
+
+void Record::Burn(){
+   while(this->Values.size()){
+      auto FrontField = this->Values.front();
+      delete FrontField;
+      this->Values.pop_front();
+   }
+}
+
+void Record::AreUSure(){
+   char op;
+   cout << "Você deseja MESMO excluir o registro atual? ";
+   cin >> op;
+   if(op == 'S' or op == 's') Burn();
+   else cout << "Lúcido!" << endl;
 }
 
 void DynamicStruct::Insert(){
@@ -127,6 +142,9 @@ int Menu(){
             Records.FindByName();
          break;
 
+         case '5':
+            Records.AreUSure();
+         break;
          case '6': return 0;
       }
    }

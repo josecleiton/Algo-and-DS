@@ -22,12 +22,16 @@ class DynamicStruct{
 
 class Record{
    list<DynamicStruct*> Values;
-
 public:
+   ~Record(){
+      Burn();
+   }
    void MergeAndInsert();
    void FindByName();
+   void AreUSure(); // Pergunta antes de destruir o registro
 private:
    DynamicStruct* Search(string elementToFind) const;
+   void Burn();
 };
 
 int Menu();
