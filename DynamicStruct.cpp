@@ -1,21 +1,28 @@
 #include "DynamicStruct.hpp"
-#include <algorithm>
 #ifndef LIB
 #define LIB
-
 #include <iostream>
 #include <list>
 #include <string>
 #include <cstring>
-
+using namespace std;
 #endif
 
-using namespace std;
+int main(){
+  return Menu();
+}
 
 void Record::MergeAndInsert(){
    DynamicStruct* temp = new DynamicStruct;
    temp->Insert();
-   this->Values.push_back(temp);
+   auto Found = this->Search(string(temp->Name));
+   if(Found == nullptr)
+    this->Values.push_back(temp);
+   else{
+    cout << "Já existe um campo com esse nome no registro. " << endl;
+    cout << "Campo não inserido no registro. " << endl;
+    Pause();
+   }
 }
 
 DynamicStruct* Record::Search(string elementToFind) const{
@@ -59,13 +66,27 @@ void Record::RemoveByName(){
    cout << "Qual o nome do campo que você deseja excluir? ";
    cin.ignore();
    getline(cin, name);
-   for(list<DynamicStruct*>::iterator it = this->Values.begin(); it != this->Values.end(); it++){
-      if((*it)->Name == name){
-	this->Values.erase(it);
-	cout << "Elemento removido com sucesso. " << endl;
+   for(auto Field: this->Values){
+      if(Field->Name == name){
+        this->Values.remove(Field);
+        delete Field;
+        cout << "Elemento removido com sucesso. " << endl;
+        Pause();
+        return;
       }
    }
    cout << "Elemento não foi encontrado. " << endl;
+   Pause();
+}
+
+void Record::FindAll(){
+   if(this->Values.size()){
+      cout << "Todos os campos do registro atual: " << endl;
+      for(auto Fields: this->Values)
+         cout << (*Fields).Name << endl;
+   }
+   else
+      cout << "Não há registros. " << endl;
    Pause();
 }
 
@@ -143,6 +164,7 @@ void ClearWindow(){
 }
 
 void Pause(){
+   cin.ignore();
    scanf("%*c");
 }
 
@@ -166,7 +188,7 @@ int Menu(){
          break;
          
          case '2':
-         
+            Records.FindAll();
          break;
 
          case '3':
@@ -180,12 +202,9 @@ int Menu(){
          case '5':
             Records.AreUSure();
          break;
+
          case '6': return 0;
       }
    }
    return 0;
-}
-
-int main(){
-  return Menu();
 }

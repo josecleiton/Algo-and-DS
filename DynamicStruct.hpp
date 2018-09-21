@@ -35,6 +35,7 @@ public:
    void FindByName();
    void AreUSure(); // Pergunta antes de destruir o registro
    void RemoveByName();
+   void FindAll();
 private:
    DynamicStruct* Search(string elementToFind) const;
    void Burn();
