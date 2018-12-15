@@ -5,11 +5,10 @@ int main(){
 }
 
 void Record::MergeAndInsert(){
-   DynamicStruct* temp = new DynamicStruct;
+   Field* temp = new Field;
    temp->Insert();
    auto Found = this->Search(string(temp->Name));
-   if(Found == nullptr)
-    this->Values.push_back(temp);
+   if(Found == nullptr) this->Values.push_back(temp);
    else{
     cout << "Já existe um campo com esse nome no registro. " << endl;
     cout << "Campo não inserido no registro. " << endl;
@@ -17,24 +16,30 @@ void Record::MergeAndInsert(){
    }
 }
 
-DynamicStruct* Record::Search(string elementToFind) const{
-   for(auto it = this->Values.begin(); it != this->Values.end(); it++){
-      if((*it)->Name == elementToFind)
-         return *it;
-   }
+Field* Record::Search(string elementToFind) const{
+   for(auto field: this->Values)
+      if(field->Name == elementToFind)
+          return field;
    return nullptr;
 }  
 
 void Record::FindByName(){
-   string elementToFind;
-   cout << "Digite o elemento a ser encontrado: ";
-   cin.ignore();
-   getline(cin, elementToFind);
-   auto Found = this->Search(elementToFind);
-   if(Found != nullptr)
-      cout << endl << *Found << endl;
-   else cout << "Elemento não foi encontrado!" << endl;
-   Pause();
+   if(this->Values.size()){
+       string elementToFind;
+       cout << "Digite o elemento a ser encontrado: ";
+       cin.clear();
+       cin.ignore();
+       getline(cin, elementToFind);
+       auto Found = this->Search(elementToFind);
+       if(Found != nullptr)
+          cout << endl << *Found << endl;
+       else cout << "Elemento não foi encontrado!" << endl;
+       Pause();
+   }
+   else{
+       cout << "Registro vazio." << endl;
+       Pause();
+   }
 }
 
 void Record::Burn(){
@@ -56,12 +61,13 @@ void Record::AreUSure(){
 void Record::RemoveByName(){
    string name;
    cout << "Qual o nome do campo que você deseja excluir? ";
+   cin.clear();
    cin.ignore();
    getline(cin, name);
-   for(auto Field: this->Values){
-      if(Field->Name == name){
-        this->Values.remove(Field);
-        delete Field;
+   for(auto field: this->Values){
+      if(field->Name == name){
+        this->Values.remove(field);
+        delete field;
         cout << "Elemento removido com sucesso. " << endl;
         Pause();
         return;
@@ -74,15 +80,38 @@ void Record::RemoveByName(){
 void Record::FindAll(){
    if(this->Values.size()){
       cout << "Todos os campos do registro atual: " << endl;
-      for(auto Fields: this->Values)
-         cout << (*Fields).Name << endl;
+      for(auto fields: this->Values)
+         cout << fields->Name << endl;
    }
    else
       cout << "Não há registros. " << endl;
    Pause();
 }
 
-void DynamicStruct::Insert(){
+Field::~Field(){
+    if(Type == "int" or Type == "unsigned int" or Type == "unsigned"){
+        int* p = reinterpret_cast<int*>(Key);
+        delete p;
+    }
+    else if(Type == "unsigned long long"){
+        unsigned long long* p = reinterpret_cast<unsigned long long*>(Key);
+        delete p;
+    }
+    else if(Type == "float" or Type == "double"){
+        double* p = reinterpret_cast<double*>(Key);
+        delete p;
+    }
+    else if(Type == "long double"){
+        long double* p = reinterpret_cast<long double*>(Key);
+        delete p;
+    }
+    else if(Type == "string"){
+        char* p = reinterpret_cast<char*>(Key);
+        delete p;
+    }
+}
+
+void Field::Insert(){
       string name, type, value;
       cout << "Insira o nome do campo: ";
       cin.ignore();
@@ -112,15 +141,14 @@ void DynamicStruct::Insert(){
       else if(type == "long double")
          this->Key = new long double(stold(value));
       else if(type == "string"){
-         size_t length = value.size() + 1;
-         this->Key = new char[length];
+         this->Key = new char[value.size()+1];
          strcpy((char*)this->Key, value.c_str());
       }
       else
          cout << "Tipo não suportado." << endl;
 }
 
-ostream &operator <<(ostream &out, const DynamicStruct &Other){
+ostream &operator <<(ostream &out, const Field &Other){
    out << "Field Name: " << Other.Name << endl;
    out << "Field Type: " << Other.Type << endl;
    out << "Field Value: ";
@@ -144,7 +172,7 @@ ostream &operator <<(ostream &out, const DynamicStruct &Other){
    return out;
 }
 
-bool operator==(const DynamicStruct &This, const DynamicStruct &Other){
+bool operator==(const Field &This, const Field &Other){
    if(This.Name == Other.Name and This.Type == Other.Type)
       return true;
    return false;

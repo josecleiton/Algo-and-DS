@@ -1,32 +1,29 @@
 #ifndef DYNAMIC
 #define DYNAMIC
 
-#define LIB
 #include <iostream>
 #include <list>
 #include <string>
 #include <cstring>
 using namespace std;
 
-class DynamicStruct{
+class Field{
    friend class Record;
    string Name{};
    string Type{};
    void* Key{};
 
-   ~DynamicStruct(){
-      delete this->Key;
-   }
+   ~Field();
 
    void Insert();
-   friend ostream &operator <<(ostream &out, const DynamicStruct &Other);
-   friend bool operator==(const DynamicStruct &This, const DynamicStruct &Other);
+   friend ostream &operator <<(ostream &out, const Field &Other);
+   friend bool operator==(const Field &This, const Field &Other);
    private:
      void Remove();
 };
 
 class Record{
-   list<DynamicStruct*> Values;
+   list<Field*> Values;
 public:
    ~Record(){
       Burn();
@@ -37,7 +34,7 @@ public:
    void RemoveByName();
    void FindAll();
 private:
-   DynamicStruct* Search(string elementToFind) const;
+   Field* Search(string elementToFind) const;
    void Burn();
 };
 
