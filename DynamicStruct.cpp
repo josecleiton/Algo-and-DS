@@ -1,12 +1,4 @@
 #include "DynamicStruct.hpp"
-#ifndef LIB
-#define LIB
-#include <iostream>
-#include <list>
-#include <string>
-#include <cstring>
-using namespace std;
-#endif
 
 int main(){
   return Menu();
