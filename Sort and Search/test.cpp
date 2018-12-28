@@ -15,7 +15,7 @@ void testSort(void){
     for(int i=0; i<MAX; i++)
         b[i] = rand();
     sorting<int> sortClass;
-    sortClass.compare(&sorting<int>::quickSort, &sorting<int>::mergeSort, vector<int>(b, b+MAX));
+    sortClass.compare(&sorting<int>::quickSort, &sorting<int>::mergeSort, vector<int>(b, b+sizeof(b)/sizeof(*b)));
     //cout << is_sorted(result.begin(), result.end()) << endl;
     //sortClass.printArray();
 }
