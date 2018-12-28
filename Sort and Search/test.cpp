@@ -1,7 +1,7 @@
 #include <iostream>
 #include "sort.hpp"
 #include "search.hpp"
-#define MAX 100000
+#define MAX 10000
 using namespace std;
 
 void testSearch(void){
@@ -15,8 +15,7 @@ void testSort(void){
     for(int i=0; i<MAX; i++)
         b[i] = rand();
     sorting<int> sortClass;
-    sortClass.compare(&sorting<int>::quickSort, &sorting<int>::radixSort, vector<int>(b, b+MAX));
-    //auto result = sortClass.insertionSort(vector<int>(b, b+MAX));
+    sortClass.compare(&sorting<int>::quickSort, &sorting<int>::mergeSort, vector<int>(b, b+MAX));
     //cout << is_sorted(result.begin(), result.end()) << endl;
     //sortClass.printArray();
 }
