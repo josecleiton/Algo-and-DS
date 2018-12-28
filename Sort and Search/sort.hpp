@@ -118,20 +118,20 @@ public:
         }
     }
 
-    // O(N+K) RUN COMPLEXITY
+    // O(N*K) RUN COMPLEXITY
     // O(N+10) (JUST O(N)) SPACE COMPLEXITY (0-9 DIGITS)
     vector<int> radixSort(vector<int> array){
         int limit = maxDigits(array);
         vector<int> result(array.size());
         vector<vector<int> > buckets(10); // 0 - 9 DIGITS
-        int nd, j;
+        int kdigit, j;
         for(int k=0; k<limit; k++){
             j=0;
             for(auto& vet: buckets) // RESET ALL BUCKETS
                 vet.clear();
             for(int i=0; i<array.size(); i++){
-                nd = ndigit(array[i], k);
-                buckets[nd].push_back(array[i]); // PUT THE INTEGERS IN BUCKETS
+                kdigit = getDigit(array[i], k);
+                buckets[kdigit].push_back(array[i]); // PUT THE INTEGERS IN BUCKETS
             }
             result.clear();
             for(auto vet: buckets)
@@ -141,7 +141,7 @@ public:
         return result;
     }
 
-    int ndigit(int num, int k){
+    int getDigit(int num, int k){
         return ((int)floor(num/pow(10, k)))%10;
     }
 
