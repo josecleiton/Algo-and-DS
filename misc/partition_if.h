@@ -44,13 +44,13 @@ bool is_partitioned_if(_ForwardIterator __first, _ForwardIterator __last, _Forwa
     {
         if(__first == __last)
             return true;
-        __first++;
+        ++__first;
     }
     while(!__comp(*__first, *__pivot))
     {
         if(__first == __last)
             return true;
-        __first++;
+        ++__first;
     }
     return false;
 }
