@@ -71,7 +71,7 @@ public:
         wrefresh(title);
 
 
-        WINDOW* content = newwin(7, 55, 3, 8);
+        WINDOW* content = newwin(7, 80, 3, 8);
         refresh();
 
         WINDOW* bottom = newwin(4, 55, 12, 5);
@@ -99,7 +99,7 @@ public:
                     input[cursor++] = static_cast<char>(op);
                     if(cursor){
                         mvwprintw(content, 0, 5,"\n%s\n", input);
-                        mvwprintw(content, 1, 13, "Suggest:\t");
+                        mvwprintw(content, 1, 13, "Sugestao:\t");
                         seek(suggests, input);
                         for(auto it: suggests)
                             wprintw(content, "%s\t", it.c_str());
@@ -122,6 +122,14 @@ public:
                 addToDict(input);
             }
         }
+        wclear(title);
+        wrefresh(title);
+
+        wclear(content);
+        wattron(content, A_BOLD);
+        mvwprintw(content, 2, 5, "Analise finalizada. Aperte qualquer tecla para sair...");
+        wrefresh(content);
+        op = getch();
 
         // FREE MEMORY
         delete[] input;
