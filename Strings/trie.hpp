@@ -143,9 +143,11 @@ protected:
                 auto itFound = node->keys.find(needle);
                 if(itFound != node->keys.end()){
                     int classf = search(itFound->ptr, input+1);
-                    if(classf == MATCH_AND_COUNT and itFound->endOfString){
-                        Key newKey(*itFound, 1);
-                        node->swap(itFound, newKey);
+                    if((classf == MATCH_AND_COUNT or classf == MATCH) and itFound->endOfString){
+                        if(classf == MATCH_AND_COUNT){
+                            Key newKey(*itFound, 1);
+                            node->swap(itFound, newKey);
+                        }
                         return MATCH;
                     }
                     else return MISMATCH;
