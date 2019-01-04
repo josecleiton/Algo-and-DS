@@ -21,7 +21,6 @@ class SpellChecker: private Trie{
 
 enum {MAX_SUGGEST=2};
 enum {MISMATCH_STRICT=10, MATCH_STRICT};
-enum {};
 
 bool userInput{};
 fstream dict;
