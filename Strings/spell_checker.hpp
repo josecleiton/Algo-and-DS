@@ -27,12 +27,14 @@ enum {MISMATCH_STRICT=10, MATCH_STRICT};
 bool userInput{};
 fstream dict;
 unsigned level;
+unsigned stringCount{};
+string dictFilename;
 
 public:
     SpellChecker(){}
 
-    SpellChecker(string _dict_filename){
-        dict.open(_dict_filename, fstream::in|fstream::app);
+    SpellChecker(string _dfn): dictFilename(_dfn){
+        dict.open(dictFilename, fstream::in|fstream::app);
         char* handle = new char[128];
         if(!handle){
             cerr << strerror(errno) << endl;
@@ -41,10 +43,9 @@ public:
         if(dict.is_open()){
             while(dict.good()){
                 dict.getline(handle, 1024);
+                stringCount++;
                 if(isalpha(*handle) and !isupper(*handle))
                     push(handle);
-                else if(*handle == '#')
-                    userInput = true;
             }
             level = height();
             //cout << this->nodeCount << endl;
@@ -59,7 +60,8 @@ public:
     }
 
     ~SpellChecker(){
-        dict.close();
+        if(userInput) reorganizeDict();
+        else dict.close();
     }
 
     enum input_flags {BACKSPACE = 0x7F, CHAR_LIMIT};
@@ -241,8 +243,31 @@ private:
         string input(_in);
         dict.clear();
         dict.flush();
-        if(!userInput) dict << endl << "# USER INPUT BELOW" << endl;
         dict << input << endl;
+        userInput = true;
+    }
+
+    void reorganizeDict(void){
+        vector<string> toSort(stringCount);
+        int i=0;
+        dict.seekg(fstream::beg);
+        while(dict.good())
+            dict >> toSort[i++];
+        sort(toSort.begin(), toSort.end());
+        dict.close();
+
+        dict.open(dictFilename+"copy", fstream::out);
+        if(dict.is_open()){
+            for(auto str: toSort)
+                dict << str << endl;
+            dict.close();
+            remove(dictFilename.c_str());
+            rename(string(dictFilename+"copy").c_str(), dictFilename.c_str());
+        }
+        else{
+            cerr << dictFilename+"copy " << strerror(errno) << endl;
+            abort();
+        }
     }
 
 };
