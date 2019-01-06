@@ -33,7 +33,7 @@ public:
     SpellChecker(){}
 
     SpellChecker(string _dfn): dictFilename(_dfn){
-        dict.open(dictFilename, fstream::in|fstream::app);
+        dict.open(dictFilename, fstream::in);
         char* handle = new char[128];
         if(!handle){
             cerr << strerror(errno) << endl;
@@ -41,7 +41,7 @@ public:
         }
         if(dict.is_open()){
             while(dict.good()){
-                dict.getline(handle, 1024);
+                dict.getline(handle, 128);
                 if(isalpha(*handle) and !isupper(*handle))
                     push(handle);
             }
@@ -282,6 +282,7 @@ void spell_help(void){
     cout << "Bem-vindo ao Simple Spell Checker" << endl;
     cout << "Feito por Jose Cleiton usando Multiway Tries" << endl;
     cout << endl << "Para usar, tenha um dicionario de palavras (sem acentuacao) e forneca o caminho. " << endl;
+    cout << "OBS: o dicionario deve ter uma palavra for linha." << endl;
     cout << "Nesse repositorio tem um dicionario: sc-dict.txt. Use-o se convir." << endl << endl;
     cout << "Qualquer duvida sera tirada, mande um email para jcleitonbc@gmail.com" << endl;
     cout << "Github: http://github.com/josecleion" << endl;
