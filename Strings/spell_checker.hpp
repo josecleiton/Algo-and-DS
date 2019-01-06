@@ -15,7 +15,7 @@
 #include <cstring>
 #include <cctype>
 #include <ctime>
-#include <ncurses.h>
+#include <curses.h>
 #include "trie.hpp"
 
 namespace trie{ 
