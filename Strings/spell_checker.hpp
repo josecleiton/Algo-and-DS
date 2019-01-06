@@ -96,9 +96,9 @@ private:
         while(true){
             wclear(content);
             if(first){
-                wattron(content, A_BOLD);
+                wattron(content, A_BOLD | A_BLINK);
                 mvwprintw(content, 2, 2,"Digite alguma letra para comecar a analise");
-                wattroff(content, A_BOLD);
+                wattroff(content, A_BOLD | A_BLINK);
                 wrefresh(content);
                 wclear(content);
                 first = false;
@@ -121,7 +121,7 @@ private:
             else wclear(content);
             wrefresh(content);
         }
-        if(!find(input, true)){
+        if(strlen(input) and !find(input, true)){
             input[--cursor] = cache;
             wclear(content);
             wrefresh(content);
@@ -148,6 +148,9 @@ private:
         mvwprintw(content, 2, 2, "Analise finalizada. Aperte qualquer tecla para sair...");
         wrefresh(content);
         
+        wclear(bottom);
+        wrefresh(bottom);
+
         getch();
 
         // FREE MEMORY
@@ -270,6 +273,20 @@ private:
     }
 
 };
+
+void spell_test(string filename){
+    SpellChecker sc(filename);
+}
+
+void spell_help(void){
+    cout << "Bem-vindo ao Simple Spell Checker" << endl;
+    cout << "Feito por Jose Cleiton usando Multiway Tries" << endl;
+    cout << endl << "Para usar, tenha um dicionario de palavras (sem acentuacao) e forneca o caminho. " << endl;
+    cout << "Nesse repositorio tem um dicionario: sc-dict.txt. Use-o se convir." << endl << endl;
+    cout << "Qualquer duvida sera tirada, mande um email para jcleitonbc@gmail.com" << endl;
+    cout << "Github: http://github.com/josecleion" << endl;
+    scanf("%*c");
+}
 
 } // namespace trie
 #endif //_SPELL_CHECKER_HPP
