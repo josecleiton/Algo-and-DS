@@ -1,4 +1,5 @@
 #include "spell_checker.hpp"
+using namespace trie;
 
 void trie_test(void){
     Trie trie;
@@ -14,13 +15,18 @@ void trie_test(void){
     cout << "Numero de nos: " << trie.size() << endl;
 }
 
-void spell_test(void){
-    SpellChecker sc("./sc-dict.txt");
-    sc.run();
+void spell_test(string filename){
+    SpellChecker sc(filename);
 }
 
-int main(){
-    //trie_test();
-    spell_test();
+int main(int argc, char* argv[]){
+    if(argc > 1) spell_test(argv[1]);
+    else{
+        string input;
+        cout << "Digite o caminho do dicionário para iniciar o spell checker (para testar a trie, deixe vazio): ";
+        getline(cin, input);
+        if(!input.empty()) spell_test(input);
+        else trie_test();
+    }
     return 0;
 }

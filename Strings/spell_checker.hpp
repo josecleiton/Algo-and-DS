@@ -17,8 +17,8 @@
 #include <ctime>
 #include <ncurses.h>
 #include "trie.hpp"
-using namespace trie_implementation;
 
+namespace trie{ 
 class SpellChecker: private Trie{
 
 enum {MAX_SUGGEST=2};
@@ -49,6 +49,7 @@ public:
             //cout << this->nodeCount << endl;
             //Trie::print();
             delete[] handle;
+            run();
         }
         else{
             cerr << strerror(errno) << endl;
@@ -61,7 +62,8 @@ public:
         if(userInput) reorganizeDict();
         else dict.close();
     }
-
+    
+private:
     enum input_flags {BACKSPACE = 0x7F, CHAR_LIMIT};
     void run(){
         
@@ -156,7 +158,6 @@ public:
         endwin();
     }
 
-private:
     int seek(vector<string>& result, char* input){
         unsigned i = 0, tam=0;
         char cache = '\0';
@@ -270,4 +271,5 @@ private:
 
 };
 
+} // namespace trie
 #endif //_SPELL_CHECKER_HPP

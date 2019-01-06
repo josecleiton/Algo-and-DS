@@ -7,7 +7,7 @@
 #include <set>
 using namespace std;
 
-namespace trie_implementation{
+namespace trie{
 
 struct Node;
 
@@ -373,6 +373,6 @@ public:
 
 };
 
-} // trie_implementation namespace
+} // trie namespace
 
 #endif //_TRIE_HPP
