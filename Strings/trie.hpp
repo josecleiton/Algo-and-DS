@@ -79,7 +79,7 @@ ostream& operator<<(ostream& out, const Node& no){
 class Trie{
 protected:
     enum {MAXSIZE=27, MAX_IN_EXTRACT_FUNCTION=50};
-    enum classificadores {MISMATCH, MATCH, MATCH_AND_COUNT, MATCH_AND_ERASE, MATCH_AND_DELETE};
+    enum classificadores {MISMATCH, MATCH, MATCH_AND_COUNT, MATCH_AND_ERASE, MATCH_AND_DELETE, HALF_MATCH, COMPLETE_MATCH};
 
     Node* root{};
     unsigned nodeCount{};
@@ -169,15 +169,17 @@ protected:
                 Key needle(*input);
                 auto itFound = node->keys.find(needle);
                 if(itFound != node->keys.end()){
-                    int classf = search(itFound->ptr, input+1);
-                    if((classf == MATCH_AND_COUNT or classf == MATCH) and itFound->endOfString){
+                    int classf = searchStrict(itFound->ptr, input+1);
+                    if(itFound->endOfString and classf != MATCH){
                         if(classf == MATCH_AND_COUNT){
                             Key newKey(*itFound, 1);
                             node->swap(itFound, newKey);
+                            return MATCH;
                         }
-                        return MATCH;
+                        else return MISMATCH;
                     }
-                    else return MISMATCH;
+                    if(classf == MATCH_AND_COUNT) return MISMATCH;
+                    return classf;
                 }
                 else return MISMATCH;
             }
@@ -217,14 +219,19 @@ protected:
     }
 
     //COLOCA EM HANDLE A PROXIMA STRING VALIDA A PARTIR DE NODE
-    bool extractNextStr(Node* node, string& handle, bool strict, char last = '\0'){
+    int extractNextStr(Node* node, string& handle, bool strict = true, char ignore = '\0'){
         if(node){
             if(strict){
                 for(auto item: node->keys){
-                    if(!last or last != item.data){
+                    if(!ignore or ignore != item.data){
+                        char last = handle.back();
                         handle.push_back(item.data);
-                        if(item.endOfString) return true;
-                        return extractNextStr(item.ptr, handle, true);
+                        if(item.endOfString){
+                            if(last == item.data) handle.pop_back();
+                            else return HALF_MATCH;
+                            return COMPLETE_MATCH;
+                        }
+                        return extractNextStr(item.ptr, handle);
                     }
                 }
             }
@@ -232,16 +239,16 @@ protected:
                 auto itFound = node->keys.lower_bound(Key(handle.back()));
                 Key needle = (itFound != node->keys.end() ? *itFound : *(--itFound));
                 for(auto item: node->keys){
-                    if(item != needle and (!last or last != item.data)){
+                    if(item != needle and (!ignore or ignore != item.data)){
                         handle.push_back(item.data);
-                        if(item.endOfString) return true;
-                        return extractNextStr(item.ptr, handle, true);
+                        if(item.endOfString) return 1;
+                        return extractNextStr(item.ptr, handle);
                     }
                 }
             }
         }
         handle.pop_back();
-        return false;
+        return MISMATCH;
     }
 
     // ESSA FUNÇÃO ASSUME QUE A TRIE NAÕ ESTÁ VAZIA
@@ -335,7 +342,7 @@ public:
     bool find(char* input, bool strict = false){
         int classf;
         if(!strict) classf = search(root, input);
-        else classf = searchStrict(root, input);
+        else return searchStrict(root, input) == MATCH;
         return (classf == MATCH or classf == MATCH_AND_COUNT);
     }
 

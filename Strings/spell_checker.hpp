@@ -10,9 +10,11 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <algorithm>
 #include <string>
 #include <cstring>
 #include <cctype>
+#include <ctime>
 #include <ncurses.h>
 #include "trie.hpp"
 using namespace trie_implementation;
@@ -24,13 +26,14 @@ enum {MISMATCH_STRICT=10, MATCH_STRICT};
 
 bool userInput{};
 fstream dict;
+unsigned level;
 
 public:
     SpellChecker(){}
 
     SpellChecker(string _dict_filename){
         dict.open(_dict_filename, fstream::in|fstream::app);
-        char* handle = new char[1024];
+        char* handle = new char[128];
         if(!handle){
             cerr << strerror(errno) << endl;
             abort();
@@ -43,6 +46,7 @@ public:
                 else if(*handle == '#')
                     userInput = true;
             }
+            level = height();
             //cout << this->nodeCount << endl;
             //Trie::print();
             delete[] handle;
@@ -58,9 +62,9 @@ public:
         dict.close();
     }
 
-    enum input_flags {BACKSPACE = 127, CHAR_LIMIT};
+    enum input_flags {BACKSPACE = 0x7F, CHAR_LIMIT};
     void run(){
-
+        
         initscr();
         noecho();
 
@@ -74,62 +78,75 @@ public:
         WINDOW* content = newwin(7, 80, 3, 8);
         refresh();
 
-        WINDOW* bottom = newwin(4, 55, 12, 5);
+        WINDOW* bottom = newwin(4, 55, 12, 10);
         refresh();
 
         wprintw(bottom, "By: Jose Cleiton (http://github.com/josecleiton).");
         wrefresh(bottom);
 
-        vector<string> suggests(MAX_SUGGEST);
+        vector<string> suggestions(MAX_SUGGEST);
         char* input = new char[1024]();
         int cursor = 0;
-        int op, cache;
-        
+        int op, sk = MATCH;
+        char cache;
+        bool first = true;
+
         while(true){
+            wclear(content);
+            if(first){
+                wattron(content, A_BOLD);
+                mvwprintw(content, 2, 2,"Digite alguma letra para comecar a analise");
+                wattroff(content, A_BOLD);
+                wrefresh(content);
+                wclear(content);
+                first = false;
+            }
             op = getch();
             if(op == '\n') break;
-            cache = op;
-            if(op < CHAR_LIMIT and isalnum(op)){
-                if(op == BACKSPACE){
-                    input[--cursor] = '\0';
-                    mvwprintw(content, 0, 5, "\n%s\n", input);
-                    for(auto& it: suggests) it = "";
+            cache = static_cast<char>(op);
+            if(op == BACKSPACE and cursor) input[--cursor] = '\0';
+            else if(isalpha(op)) input[cursor++] = static_cast<char>(op);
+            if(strlen(input)){
+                mvwprintw(content, 0, 0,"\n%s\n", input);
+                mvwprintw(content, 3, 0, "Sugestao:\t");
+                if(cursor < level){
+                    seek(suggestions, input);
+                    for(auto it: suggestions)
+                        wprintw(content, "%s\t", it.c_str());
                 }
-                else{
-                    input[cursor++] = static_cast<char>(op);
-                    if(cursor){
-                        mvwprintw(content, 0, 5,"\n%s\n", input);
-                        mvwprintw(content, 1, 13, "Sugestao:\t");
-                        seek(suggests, input);
-                        for(auto it: suggests)
-                            wprintw(content, "%s\t", it.c_str());
-                        wrefresh(content);
-                    }
-                }
+                for(auto& it: suggestions) it = "";
             }
+            else wclear(content);
+            wrefresh(content);
         }
         if(!find(input, true)){
             input[--cursor] = cache;
             wclear(content);
             wrefresh(content);
             wattron(content, A_STANDOUT);
-            mvwprintw(content, 1, 5, "Deseja adicionar: %s ao dicionario? (S ou N)  ", input);
+            mvwprintw(content, 1, 5, "Deseja adicionar: ");
+            wattron(content, A_BOLD);
+            wprintw(content, "%s", input);
+            wattroff(content, A_BOLD);
+            wprintw(content, " ao dicionario? (S ou N)  ");
             wrefresh(content);
             op = getch();
             wattroff(content, A_STANDOUT);
-            if(op == 'S' or op == 's' or op == 'Y' or op == 'y' or op == '\n'){
+            if(op == '\n' or op == 's' or op == 'y'){
                 push(input);
                 addToDict(input);
             }
         }
+        
         wclear(title);
         wrefresh(title);
 
         wclear(content);
         wattron(content, A_BOLD);
-        mvwprintw(content, 2, 5, "Analise finalizada. Aperte qualquer tecla para sair...");
+        mvwprintw(content, 2, 2, "Analise finalizada. Aperte qualquer tecla para sair...");
         wrefresh(content);
-        op = getch();
+        
+        getch();
 
         // FREE MEMORY
         delete[] input;
@@ -138,70 +155,83 @@ public:
         delwin(bottom);
         endwin();
     }
-    
+
+private:
     int seek(vector<string>& result, char* input){
-        unsigned i = 0;
+        unsigned i = 0, tam=0;
+        char cache = '\0';
         Node* handle = nullptr;
-        int classf = search(root, input, handle);
+        int classf = search(root, input, handle, tam, cache);
         string temp(input);
         if(classf == MATCH or classf == MATCH_AND_COUNT or classf == MATCH_STRICT){
-            extractNextStr(handle, temp, false);
+            classf = extractNextStr(handle, temp);
             result[i++] = temp;
-            temp.clear();
-            temp = string(input);
-            temp.pop_back();
-            if(!temp.empty()){
-                extractNextStr(handle, temp, true);
-                result[i] = (temp != result[i-1]) ? temp: "";
+            if(classf != COMPLETE_MATCH){
+                temp.clear();
+                temp = string(input);
+                if(extractNextStr(handle, temp, true, result[i-1][temp.size()]) and temp != result[i-1])
+                    result[i] = temp;
             }
             return MATCH;
         }
-        else{ // MISMATCH
+        else if(heightAux(handle) >= strlen(input) - MAX_SUGGEST){ // MISMATCH
             vector<string> container(MAX_IN_EXTRACT_FUNCTION);
-            unsigned cursor = 0, count =0;
-            temp.clear();
-            extractAll(handle, temp, container, cursor);
-            for(auto& strs: container)
-                if(!strs.empty() and i < MAX_SUGGEST)
-                    strs = input + strs;
-                else break;
-            for(auto& strs: container)
-                if(!strs.empty() and i < MAX_SUGGEST)
-                    result[i++] = strs;
-                else break;
+            unsigned cursor = 0, count = 0;
+            string aux;
+            extractAll(handle, aux, container, cursor);
+            //if(cache) temp[tam] = cache;
+
+            vector<int> index(MAX_SUGGEST);
+            srand(time(NULL));
+            for(unsigned i=0; i<MAX_SUGGEST; i++)
+                index[i] = rand()%cursor;
+            // PEGA APENAS OS ITENS UNICOS
+            index.resize(distance(index.begin(), unique(index.begin(), index.end())));
+            cursor = 0;
+            if(cache and classf == MISMATCH) temp[tam-1] = cache;
+            for(auto item: index)
+                result[cursor++] = string(temp, 0, tam) + container[item];
         }
         return MISMATCH;
     }
 
-private:
-    int search(Node* node, char* input, Node*& result){
+    int search(Node* node, char* input, Node*& result, unsigned& tam, char& flag){
         if(node){
             if(*input != '\0'){
                 Key needle(*input);
-                auto itFound = node->keys.find(needle);
-                if(itFound != node->keys.end()){
-                    int classf = search(itFound->ptr, input+1, result);
-                    if(classf == MATCH_AND_COUNT and itFound->endOfString){
+                auto itFound = node->keys.lower_bound(needle);
+                if(itFound->data == *input){
+                    int classf = search(itFound->ptr, input+1, result, tam, flag);
+                    if((classf == MATCH_AND_COUNT) and itFound->endOfString and !result){
                         Key newKey(*itFound, 1);
                         node->swap(itFound, newKey);
                         result = node;
+                        tam++;
                         return MATCH_STRICT;
                     }
                     else if(!result){
                         result = node;
-                        classf = MISMATCH;
+                        classf = MISMATCH_STRICT;
                     }
+                    tam += (classf == MISMATCH or classf == MISMATCH_STRICT or classf == MATCH_STRICT);
                     return classf;
                 }
                 else{
                     itFound--;
-                    result = itFound->ptr;
-                    *input = itFound->data;
-                    return MISMATCH;
+                    flag = itFound->data;
+                    if(itFound->ptr){
+                        result = itFound->ptr;
+                        tam++;
+                        return MISMATCH;
+                    }
+                    else{
+                        result = node;
+                        return MISMATCH_STRICT;
+                    }
                 }
             }
             result = node;
-            return MISMATCH_STRICT;
+            return MATCH_AND_COUNT;
         }
         else if(*input) return MISMATCH;
         return MATCH_AND_COUNT;
