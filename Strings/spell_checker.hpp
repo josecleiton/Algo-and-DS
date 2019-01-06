@@ -27,7 +27,6 @@ enum {MISMATCH_STRICT=10, MATCH_STRICT};
 bool userInput{};
 fstream dict;
 unsigned level;
-unsigned stringCount{};
 string dictFilename;
 
 public:
@@ -43,7 +42,6 @@ public:
         if(dict.is_open()){
             while(dict.good()){
                 dict.getline(handle, 1024);
-                stringCount++;
                 if(isalpha(*handle) and !isupper(*handle))
                     push(handle);
             }

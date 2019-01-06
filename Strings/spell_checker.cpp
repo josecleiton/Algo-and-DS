@@ -10,6 +10,8 @@ void trie_test(void){
     trie.erase(strs[4]);
     trie.print();
     cout << "ALTURA: " << trie.height() << endl;
+    cout << "Numero de Strings: " << trie.count() << endl;
+    cout << "Numero de nos: " << trie.size() << endl;
 }
 
 void spell_test(void){

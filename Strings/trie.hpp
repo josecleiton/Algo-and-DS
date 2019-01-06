@@ -83,6 +83,7 @@ protected:
 
     Node* root{};
     unsigned nodeCount{};
+    unsigned stringCount{};
 
 public:
     Trie(){}
@@ -276,18 +277,19 @@ protected:
         return 0;
     }
 
-    int findAndDelete(Node* node, char* input){
+    int findAndDelete(Node* node, char* input, unsigned& deleted){
         if(node){
             if(*input){
                 Key in(*input);
                 set<Key>::iterator itFound = node->keys.find(in);
                 if(itFound != node->keys.end()){
-                    int classf = findAndDelete(itFound->ptr, input+1);
+                    int classf = findAndDelete(itFound->ptr, input+1, deleted);
                     if(classf >= MATCH_AND_ERASE or (classf == MATCH_AND_COUNT and itFound->endOfString)){
                         if(classf == MATCH_AND_DELETE){
                             if(itFound->endOfString){
                                 Key newKey(itFound->data, nullptr, true);
-                                node->swap(itFound, newKey);     
+                                node->swap(itFound, newKey);   
+                                deleted = true;  
                                 return MATCH;
                             }
                             node->keys.erase(itFound);
@@ -303,6 +305,7 @@ protected:
                         else{
                             node->keys.erase(itFound);
                             if(node->keys.empty()){
+                                deleted++;
                                 delete node;
                                 return MATCH_AND_DELETE;
                             }
@@ -337,6 +340,7 @@ public:
     void push(char* input){
         bool endOfString = false;
         insert(root, input, endOfString);
+        stringCount++;
     }
 
     bool find(char* input, bool strict = false){
@@ -352,13 +356,20 @@ public:
     }
 
     bool erase(char* in){
-        int classf = findAndDelete(root, in);
-        return (classf == MATCH or classf == MATCH_AND_COUNT);
+        unsigned deleted = 0;
+        int classf = findAndDelete(root, in, deleted);
+        if(classf == MATCH or classf == MATCH_AND_COUNT){
+            if(deleted) nodeCount -= deleted;
+            stringCount--;
+            return true;
+        }
+        return false;
     }
 
     bool empty(void){ return !nodeCount; }
     unsigned size(void){ return nodeCount; }
     unsigned height(void){ return heightAux(root); }
+    unsigned count(void){ return stringCount; }
 
 };
 
