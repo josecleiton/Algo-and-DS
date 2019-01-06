@@ -2,6 +2,7 @@
 #define _TRIE_HPP
 
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <set>
 using namespace std;
@@ -18,12 +19,13 @@ struct Key{
 
     Key(){}
     Key(char c): data(c){}
-    Key(char c, Node* p, bool swapEOS): data(c), ptr(p){
+    Key(char c, Node* p, bool swapEOS = false): data(c), ptr(p){
         if(swapEOS) endOfString = !endOfString;
     }
-    Key(const Key& a, unsigned sum){
+    Key(const Key& a, unsigned sum, bool changeEOS = false){
         *this = a;
         this->count += sum;
+        if(changeEOS) this->endOfString = !this->endOfString;
     }
 };
 
@@ -67,16 +69,41 @@ struct Node{
     }
 };
 
+ostream& operator<<(ostream& out, const Node& no){
+    for(auto it: no.keys)
+        out << it.data << " -> ";
+    out << "#";
+    return out;
+}
+
 class Trie{
 protected:
     enum {MAXSIZE=27, MAX_IN_EXTRACT_FUNCTION=50};
-    enum classificadores {MISMATCH, MATCH, MATCH_AND_COUNT};
+    enum classificadores {MISMATCH, MATCH, MATCH_AND_COUNT, MATCH_AND_ERASE, MATCH_AND_DELETE};
 
     Node* root{};
     unsigned nodeCount{};
 
 public:
     Trie(){}
+    Trie(string _filename){
+        ifstream text(_filename);
+        if(text.is_open()){
+            string aux;
+            char* input = new char[512];
+            while(text.good()){
+                text >> aux;
+                strcpy(input, aux.c_str());
+                push(input);
+            }
+            delete[] input;
+            text.close();
+        }
+        else{
+            cerr << "Erro ao abrir o arquivo: " << _filename << endl;
+            *this = Trie();
+        }
+    }
     ~Trie(){
         kill(root);
         root = nullptr;
@@ -190,23 +217,26 @@ protected:
     }
 
     //COLOCA EM HANDLE A PROXIMA STRING VALIDA A PARTIR DE NODE
-    bool extractNextStr(Node* node, string& handle, bool first){
+    bool extractNextStr(Node* node, string& handle, bool strict, char last = '\0'){
         if(node){
-            auto itFound = node->keys.find(Key(handle.back()));
-            if(itFound != node->keys.end() and !first){
-                return extractNextStr(itFound->ptr, handle, first);
-            }
-            else{
+            if(strict){
                 for(auto item: node->keys){
-                    if(item.endOfString){
+                    if(!last or last != item.data){
                         handle.push_back(item.data);
-                        return true;
+                        if(item.endOfString) return true;
+                        return extractNextStr(item.ptr, handle, true);
                     }
                 }
+            }
+            else{
+                auto itFound = node->keys.lower_bound(Key(handle.back()));
+                Key needle = (itFound != node->keys.end() ? *itFound : *(--itFound));
                 for(auto item: node->keys){
-                    handle.push_back(item.data);
-                    if(item.endOfString) return true;
-                    if(extractNextStr(item.ptr, handle, first)) return true;
+                    if(item != needle and (!last or last != item.data)){
+                        handle.push_back(item.data);
+                        if(item.endOfString) return true;
+                        return extractNextStr(item.ptr, handle, true);
+                    }
                 }
             }
         }
@@ -232,11 +262,56 @@ protected:
             unsigned max = 0, current;
             for(auto item: node->keys){
                 current = heightAux(item.ptr);
-                max = (current > max)?current:max;
+                max = (current > max) ? current : max;
             }
             return max + 1;
         }
         return 0;
+    }
+
+    int findAndDelete(Node* node, char* input){
+        if(node){
+            if(*input){
+                Key in(*input);
+                set<Key>::iterator itFound = node->keys.find(in);
+                if(itFound != node->keys.end()){
+                    int classf = findAndDelete(itFound->ptr, input+1);
+                    if(classf >= MATCH_AND_ERASE or (classf == MATCH_AND_COUNT and itFound->endOfString)){
+                        if(classf == MATCH_AND_DELETE){
+                            if(itFound->endOfString){
+                                Key newKey(itFound->data, nullptr, true);
+                                node->swap(itFound, newKey);     
+                                return MATCH;
+                            }
+                            node->keys.erase(itFound);
+                            return MATCH_AND_ERASE;
+                        }
+                        if(itFound->ptr){
+                            if(itFound->endOfString){
+                                Key newKey(*itFound, 0, true);
+                                node->swap(itFound, newKey); 
+                            }
+                            else return MATCH;
+                        }
+                        else{
+                            node->keys.erase(itFound);
+                            if(node->keys.empty()){
+                                delete node;
+                                return MATCH_AND_DELETE;
+                            }
+                            return MATCH_AND_ERASE;
+                        }
+                        return MATCH;
+                    }
+                    if(classf == MATCH) return classf;
+                    return MISMATCH;
+                }
+                else return MISMATCH;
+            }
+            else return MATCH_AND_COUNT;
+        }
+        if(*input) return MISMATCH;
+        return MATCH_AND_COUNT;
     }
 
     void kill(Node* node){
@@ -267,6 +342,11 @@ public:
     void print(){
         string aux;
         printRestrict(root, aux);
+    }
+
+    bool erase(char* in){
+        int classf = findAndDelete(root, in);
+        return (classf == MATCH or classf == MATCH_AND_COUNT);
     }
 
     bool empty(void){ return !nodeCount; }
