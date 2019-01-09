@@ -1,5 +1,5 @@
 #include "BinarySearchTree.hpp"
-#include "Heap.hpp"
+#include "MaxHeap.hpp"
 using namespace binary_tree;
 
 void test_bst(void){
