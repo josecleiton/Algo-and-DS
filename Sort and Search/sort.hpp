@@ -63,7 +63,7 @@ public:
     vector<ValueType> mergeSort(vector<ValueType> array){
         if(array.size() <= 1)
             return array;
-        size_t middle = array.size()/2;
+        int64_t middle = array.size()/2;
         auto left = mergeSort(vector<ValueType>(array.begin(), array.begin()+middle));
         auto right = mergeSort(vector<ValueType>(array.begin()+middle+1 , array.end()));
         return merge(left, right);
@@ -101,10 +101,10 @@ public:
     }
 
 private:
-    size_t pivot(vector<ValueType>& array, size_t low, size_t high){
+    int64_t pivot(vector<ValueType>& array, int64_t low, int64_t high){
         ValueType pivot = array[high];
-        size_t i = low-1;
-        for(size_t j=low; j<=high-1; j++){
+        int64_t i = low-1;
+        for(int64_t j=low; j<=high-1; j++){
             if(array[j] <= pivot){
                 i++;
                 swap(array[i], array[j]);
@@ -114,9 +114,9 @@ private:
         return i+1;
     }
 
-    void quickRec(vector<ValueType>& array, size_t low, size_t high){
+    void quickRec(vector<ValueType>& array, int64_t low, int64_t high){
         if(low < high){
-            size_t pivotIndex = pivot(array, low, high);
+            int64_t pivotIndex = pivot(array, low, high);
             quickRec(array, low, pivotIndex-1);
             quickRec(array, pivotIndex+1, high);
         }
@@ -185,8 +185,8 @@ public:
     }
 
 private:
-    void heapify(vector<ValueType>& array, size_t tam, size_t i){
-        size_t largest = i, left = 2*i+1, right = 2*i+2;
+    void heapify(vector<ValueType>& array, int64_t tam, int64_t i){
+        int64_t largest = i, left = 2*i+1, right = 2*i+2;
         if(left < tam and array[left] > array[largest])
             largest = left;
         if(right < tam and array[right] > array[largest])
