@@ -2,12 +2,13 @@
 #define _BST_HPP
 #include <iostream>
 #include <memory>
+#include <stack>
 #include <queue>
 #include <algorithm>
 using namespace std;
 
 namespace binary_tree{
-    
+
 template <class ValueType>
 class TreeNode{
    public:
@@ -59,7 +60,7 @@ public:
        if(root == nullptr) return true;
        long long leftHeight = Height(root->left);
        long long rightHeight = Height(root->right);
-       
+
        if ((abs(leftHeight-rightHeight)<=1) and IsBalanced(root->left) and IsBalanced(root->right))
           return true;
        else return false;
@@ -70,20 +71,20 @@ public:
           return true;
        if(root1 != nullptr and root2 != nullptr)
           return IsMirror(root1->left, root2->right) and IsMirror(root1->right, root2->left);
-       
+
        return false;
     }
 
     TreeNode<ValueType>* GetRootNode() const{
        return this->root;
     }
-    
+
     TreeNode<ValueType>* MinValue(TreeNode<ValueType> *&root){
         TreeNode<ValueType>* aux = root;
         while(aux->left != nullptr)
             aux = aux->left;
         return aux;
-            
+
     }
 
     /// Remove o elemento
@@ -106,7 +107,7 @@ private:
         }
         return false;
     }
-    
+
 public:
     TreeNode<ValueType>* FindAndRemove(TreeNode<ValueType> *&NodeToRemove,const ValueType& elementToRemove){
         if(NodeToRemove != nullptr){
@@ -132,7 +133,7 @@ public:
         }
         return nullptr;
     }
-        
+
 
     /// Busca pelo elemento
     TreeNode<ValueType>*& Search(TreeNode<ValueType> *&root, const ValueType& elementToFind) const{
@@ -169,7 +170,33 @@ public:
          InOrder(root->right);
       }
     }
-    
+
+    void InOrderIt(TreeNode<ValueType> *root) const{
+       if(root != nullptr){
+          stack<pair<TreeNode<ValueType>*, unsigned>> s;
+          s.push(make_pair(root, 0));
+          pair<TreeNode<ValueType>*, int> nodeCheck;
+          while(!s.empty()){
+             nodeCheck = s.top();
+             if(nodeCheck.first->left and !nodeCheck.second){//none visited
+                s.top().second++; // left visited
+                s.push(make_pair(nodeCheck.first->left, 0));
+                continue;
+             }
+
+             if(nodeCheck.second<2){
+                cout<<nodeCheck.first->key<<endl;
+                  if(nodeCheck.first->right){
+                     s.top().second++; // right visited
+                     s.push(make_pair(nodeCheck.first->right, 0));
+                     continue;
+                  }
+             }
+             s.pop();
+          }
+       }
+    }
+
     void PostOrder(TreeNode<ValueType> *&root) const{
        if(root != nullptr){
           PostOrder(root-left);

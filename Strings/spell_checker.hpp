@@ -18,7 +18,7 @@
 #include <curses.h>
 #include "trie.hpp"
 
-namespace trie{ 
+namespace trie{
 class SpellChecker: private Trie{
 
 enum {MAX_SUGGEST=2};
@@ -62,11 +62,11 @@ public:
         if(userInput) reorganizeDict();
         else dict.close();
     }
-    
+
 private:
     enum input_flags {BACKSPACE = 0x7F, CHAR_LIMIT};
     void run(){
-        
+
         initscr();
         noecho();
 
@@ -89,7 +89,7 @@ private:
         vector<string> suggestions(MAX_SUGGEST);
         char* input = new char[1024]();
         int cursor = 0;
-        int op, sk = MATCH;
+        int op;
         char cache;
         bool first = true;
 
@@ -139,7 +139,7 @@ private:
                 addToDict(input);
             }
         }
-        
+
         wclear(title);
         wrefresh(title);
 
@@ -147,7 +147,7 @@ private:
         wattron(content, A_BOLD);
         mvwprintw(content, 2, 2, "Analise finalizada. Aperte qualquer tecla para sair...");
         wrefresh(content);
-        
+
         wclear(bottom);
         wrefresh(bottom);
 
@@ -180,7 +180,7 @@ private:
         }
         else if(heightAux(handle) >= strlen(input) - MAX_SUGGEST){ // MISMATCH
             vector<string> container(MAX_IN_EXTRACT_FUNCTION);
-            unsigned cursor = 0, count = 0;
+            unsigned cursor = 0;
             string aux;
             extractAll(handle, aux, container, cursor);
             //if(cache) temp[tam] = cache;

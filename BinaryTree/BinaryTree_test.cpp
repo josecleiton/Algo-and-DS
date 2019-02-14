@@ -10,7 +10,7 @@ void test_bst(void){
    BST.Insert(k, 3);
    BST.Insert(k, 2);
    BST.Insert(k, 1);
-   BST.FindAndRemove(k, 4);
+   //BST.FindAndRemove(k, 4);
    cout << "\tBINARY SEARCH TREE!" << endl;
    cout << "Nós na árvore: " << BST.Count() << endl;
    cout << "Altura da árvore: " << BST.Height(k) << endl;
@@ -18,7 +18,10 @@ void test_bst(void){
    if(BST.IsBalanced(k)) cout << "True\n";
    else cout << "False\n";
    //b.InOrder(k);
+   cout<<"BFS: "<<endl;
    BST.InLevel(k);
+   cout<<"DFS: "<<endl;
+   BST.InOrderIt(k);
 }
 
 bool compare(const int& a, const int& b){ return a > b; }
