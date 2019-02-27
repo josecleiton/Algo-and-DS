@@ -1,0 +1,14 @@
+#!/usr/bin/gnuplot
+reset
+
+set terminal svg
+
+set yrange[-500:40000]
+set xrange[1000000:200000000]
+set logscale xy
+set title 'Nth vs Sort'
+set key above
+set grid
+set xlabel 'Set size'
+set ylabel 'Time in seconds'
+plot 'in1.txt' title 'Nth' with lines smooth csplines, 'in2.txt' title 'Sort STL' with lines smooth csplines

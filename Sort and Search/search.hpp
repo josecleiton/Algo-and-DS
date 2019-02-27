@@ -37,7 +37,7 @@ public:
         return -1;
     }
 
-    void compare(searchFunc_t A, searchFunc_t B, vector<ValueType> vet, ValueType K){
+    void compare(searchFunc_t A, searchFunc_t B, vector<ValueType>& vet, ValueType K){
         intmax_t result;
         float timeA, timeB;
         clock_t clk = clock();

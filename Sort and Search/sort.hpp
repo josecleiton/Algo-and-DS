@@ -159,9 +159,12 @@ private:
     }
     
     int maxDigits(vector<int>& vet){
-        int result = 0;
-        for(auto i: vet)
-            result = max(result, digitCount(i));
+        int result = digitCount(vet[0]), tmp;
+        for(int i=1; i<vet.size(); i++){
+            tmp = digitCount(vet[i]);
+            if(tmp > result)
+                result = tmp;
+        }
         return result;
     }
 
@@ -209,7 +212,7 @@ public:
         return array;
     }
 
-    void compare(sortFunc_t A, sortFunc_t B, vector<ValueType> vet){
+    void compare(sortFunc_t A, sortFunc_t B, vector<ValueType>& vet){
         vector<ValueType> result;
         float timeA, timeB;
         clock_t clk = clock();
