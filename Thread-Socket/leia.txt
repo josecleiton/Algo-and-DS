@@ -1,0 +1,2 @@
+Chame o cliente com o ip do servidor e a porta.
+Chame o servidor com apenas a porta.

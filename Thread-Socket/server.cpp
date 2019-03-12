@@ -10,6 +10,7 @@
 #include <thread>
 #include <vector>
 #include <algorithm>
+#define BUFFER_SIZE 100000
 using namespace std;
 
 enum ordem { DECRESCENTE, CRESCENTE };
@@ -18,24 +19,15 @@ void server_processor(long long* input){
    sort(input+1, input+input[0], less<long long>());
 }
 
-void get_cfg(int& port, int& len){
-   ifstream file("cfg.txt");
-   if(file.is_open()){
-      file >> port >> len;
-      file.close();
-      return;
-   }
-   exit(EXIT_FAILURE);
-}
-
-int main(){
+int main(int argc, char *argv[]){
+   if(argc < 2) return -1;
    vector<thread> ts; // threads
-   int server_fd, new_socket, valread, PORT, BUFFER_SIZE;
-   get_cfg(PORT, BUFFER_SIZE);
+   int server_fd, new_socket, valread, PORT = atoi(argv[1]);
+
    sockaddr_in address;
    const int opt = 1;
    int addrlen = sizeof(address);
-   long long* buffer = new long long[BUFFER_SIZE];
+   long long buffer[BUFFER_SIZE];
    unsigned long count = 1;
 
    // CRIANDO UM SOCKET
@@ -94,6 +86,5 @@ int main(){
 
    }
    close(server_fd);
-   delete[] buffer;
    return 0;
 }

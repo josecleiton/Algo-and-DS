@@ -5,6 +5,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <cstring>
+#define BUFFER_SIZE 100000
 using namespace std;
 
 enum ordem { DECRESCENTE, CRESCENTE };
@@ -30,25 +31,11 @@ void ler_vetor(long long* buffer) {
    }
 }
 
-void get_cfg(int& port, int& len){
-   ifstream file("cfg.txt");
-   string temp;
-   if(file.is_open()){
-      file >> temp >> port;
-      file >> temp >> len;
-      file.close();
-      return;
-   }
-   exit(EXIT_FAILURE);
-}
-
-int main(){
-   int sock = 0, valread, PORT, BUFFER_SIZE;
-   get_cfg(PORT, BUFFER_SIZE);
+int main(int argc, char* argv[]){
+   if (argc < 2) return -1;
+   int sock = 0, valread, PORT = atoi(argv[2]);
    sockaddr_in serv_addr;
-   long long* buffer = new long long[BUFFER_SIZE];
-   unsigned long count = 1;
-
+   long long buffer[BUFFER_SIZE];
 
    // CRIANDO UM SOCKET
    if((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
@@ -61,7 +48,7 @@ int main(){
    serv_addr.sin_family = AF_INET;
    serv_addr.sin_port = htons(PORT);
 
-   if(inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr)<=0) {
+   if(inet_pton(AF_INET, argv[1], &serv_addr.sin_addr)<=0) {
       cerr << "[ERRO] Endereço IP invalido ou nao suportado." << endl;
       exit(EXIT_FAILURE);
    }
@@ -93,7 +80,6 @@ int main(){
 
 
    close(sock);
-   delete[] buffer;
    delete[] vet;
    return 0;
 }
