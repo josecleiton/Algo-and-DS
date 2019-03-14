@@ -31,11 +31,16 @@ int main(int argc, char *argv[]){
    unsigned long count = 1;
 
    // CRIANDO UM SOCKET
-   if((server_fd = socket(AF_INET, SOCK_STREAM,  IPPROTO_TCP)) == false) {
+   if(!(server_fd = socket(AF_INET, SOCK_STREAM,  IPPROTO_TCP))) {
       perror("[ERRO] Socket falhou");
       exit(EXIT_FAILURE);
    }
 
+    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT,  &opt, sizeof(opt))) { 
+        perror("[ERRO] Setsockopt"); 
+        exit(EXIT_FAILURE); 
+    } 
+   
    address.sin_addr.s_addr = inet_addr("127.0.0.1");
    address.sin_family = AF_INET;
    address.sin_port = htons(PORT);
