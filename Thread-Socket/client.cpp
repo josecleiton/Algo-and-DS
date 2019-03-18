@@ -49,14 +49,14 @@ int main(int argc, char* argv[]){
    serv_addr.sin_port = htons(PORT);
 
    if(inet_pton(AF_INET, argv[1], &serv_addr.sin_addr)<=0) {
-      cerr << "[ERRO] Endereço IP invalido ou nao suportado." << endl;
+      perror("[ERRO] Endereço IP invalido ou nao suportado.");
       exit(EXIT_FAILURE);
    }
 
    cout << "[STATUS] Executando cliente..." << endl;
 
    if(connect(sock, (sockaddr*) &serv_addr, sizeof(serv_addr)) < 0) {
-         cerr << "[ERRO] Conexao falhou" << endl;
+         perror("[ERRO] Conexao falhou");
          exit(EXIT_FAILURE);
    }
 
@@ -65,7 +65,7 @@ int main(int argc, char* argv[]){
 
    auto answ = send(sock, (void*)vet, sizeof(long long)*len, 0);
    if(answ <= 0) {
-      cerr << "[ERRO] Falha no envio" << endl;
+      perror("[ERRO] Falha no envio");
       exit(EXIT_FAILURE);
    }
 
