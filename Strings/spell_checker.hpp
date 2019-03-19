@@ -110,7 +110,7 @@ private:
             else if(isalpha(op)) input[cursor++] = static_cast<char>(op);
             if(strlen(input)){
                 mvwprintw(content, 0, 0,"\n%s\n", input);
-                mvwprintw(content, 3, 0, "Sugestao:\t");
+                mvwprintw(content, 3, 0, "Suggestion:\t");
                 if(cursor < level){
                     seek(suggestions, input);
                     for(auto it: suggestions)
