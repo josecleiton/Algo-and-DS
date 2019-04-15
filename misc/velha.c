@@ -88,8 +88,7 @@ bool linha(void) {
       sum = 0u;
       for (uchar j = 0; j < TAM; j++)
         sum += (1u << ((i * TAM + j) * 2) & velha) ? 1 : 0;
-      if (ganhou(sum))
-        return true;
+      return ganhou(sum);
     }
   }
   return false;
@@ -105,8 +104,7 @@ bool coluna(void) {
       sum = 0;
       for (uchar j = 0; j < TAM; j++)
         sum += (1u << ((1 + i + j * TAM) * 2 - 2) & velha) ? 1 : 0;
-      if (ganhou(sum))
-        return true;
+      return ganhou(sum);
     }
   }
   return false;
@@ -126,8 +124,7 @@ bool diagonal(void) {
       sum_pd += (1u << ((j * (TAM + 1)) * 2) & velha) ? 1 : 0;
       sum_sd += (1u << ((TAM + j * (TAM + 1) + 1)) & velha) ? 1 : 0;
     }
-    if (ganhou(sum_pd) || ganhou(sum_sd))
-      return true;
+    return ganhou(sum_pd) || ganhou(sum_sd);
   }
   return false;
 }
