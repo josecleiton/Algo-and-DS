@@ -10,6 +10,7 @@ import "io/ioutil"
 import "os"
 import "mime"
 import "path/filepath"
+import "sort"
 
 func main() {
    port := ":8080"
@@ -113,6 +114,19 @@ func getFileByRoute(path string) ([]byte, string){
       files, _ := ioutil.ReadDir(dirPath)
       // fmt.Println("dirPath:",dirPath)
       htmlDirPage := fmt.Sprintf("<html><head><title>%s</title></head><body><h1>Directory: /%s</h1><ul>", dirPath, dirPath)
+      sort.SliceStable(files, func(i, j int) bool {
+         var fileInfo [2] os.FileInfo
+         fileInfo[0], _ = os.Stat(dirPath + "/" + files[i].Name())
+         fileInfo[1], _ = os.Stat(dirPath + "/" + files[j].Name())
+         if fileInfo[0].IsDir() && fileInfo[1].IsDir() {
+            return fileInfo[0].Name() < fileInfo[1].Name()
+         } else if fileInfo[0].IsDir() {
+            return true
+         } else if fileInfo[1].IsDir() {
+            return false
+         }
+         return fileInfo[0].Name() < fileInfo[1].Name()
+      })
       for _, f := range files {
          fullpath := dirPath + "/" + f.Name()
          fileInfo, _ := os.Stat(fullpath)
@@ -143,3 +157,6 @@ func writeError(conn net.Conn, errorCode int) {
    errorString += "\r\n\r\n"
    fmt.Fprint(conn, errorString)
 }
+
+
+
