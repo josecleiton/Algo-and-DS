@@ -87,7 +87,8 @@ func getFileByRoute(path string) ([]byte, string){
    dirPath := ""
    path = path[1:]
    if path == "" {
-      path = "index.html"
+      dirPath = "."
+      path = "./index.html"
    } else {
       fileInfo, err := os.Stat(path)
       if err != nil {
@@ -101,23 +102,35 @@ func getFileByRoute(path string) ([]byte, string){
 
    log.Println("Caminho:", path)
    mime := mime.TypeByExtension(filepath.Ext(path))
+   if mime == "" {
+      mime = "text/plain"
+   }
    log.Println("Mime:",mime)
    data, err := ioutil.ReadFile(path)
    if err != nil && dirPath == "" {
       return make([]byte, 0), ""
-   } else if dirPath != "" {
+   } else if dirPath != "" && err != nil {
       files, _ := ioutil.ReadDir(dirPath)
       // fmt.Println("dirPath:",dirPath)
       htmlDirPage := fmt.Sprintf("<html><head><title>%s</title></head><body><h1>Directory: /%s</h1><ul>", dirPath, dirPath)
       for _, f := range files {
          fullpath := dirPath + "/" + f.Name()
+         fileInfo, _ := os.Stat(fullpath)
          log.Println("fullpath:", fullpath)
-         htmlDirPage += fmt.Sprintf("<li><a href=\"%s\">%s</a></li>", fullpath ,f.Name())
+         htmlDirPage += fmt.Sprintf("<li><a href=\"%s\">%s</a></li>", fullpath , formatName(f.Name(), fileInfo.IsDir()))
       }
       htmlDirPage += "</ul></body></html>"
       data = []byte(htmlDirPage)
    }
    return data, mime
+}
+
+func formatName(filename string, isDir bool) string {
+   if isDir {
+      return "<strong>" + filename + "</strong>"
+   } else {
+      return filename
+   }
 }
 
 func writeError(conn net.Conn, errorCode int) {
