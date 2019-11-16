@@ -12,8 +12,13 @@ import "mime"
 import "path/filepath"
 
 func main() {
-   fmt.Println("Iniciando servidor...")
-   li, err := net.Listen("tcp", ":8082")
+   port := ":8080"
+   log.Println("Args", os.Args)
+   if len(os.Args) > 1 {
+      port = ":" + os.Args[1]
+   }
+   log.Printf("Iniciando servidor http na porta %s...\n", port)
+   li, err := net.Listen("tcp", port)
    if err != nil {
       log.Panic(err)
    }
@@ -37,9 +42,10 @@ func handle(conn net.Conn, clientNumber int) {
 
    }
    defer conn.Close()
-   fmt.Printf("Lendo a requisição da conexão #%d\n", clientNumber)
+   log.Println("")
+   log.Printf("Lendo a requisição da conexão #%d:\n", clientNumber)
    request(conn)
-   fmt.Printf("Respondendo a requisição da conexão #%d\n", clientNumber)
+   log.Printf("Enviando resposta a conexão #%d...\n", clientNumber)
 }
 
 func request(conn net.Conn) {
@@ -47,7 +53,7 @@ func request(conn net.Conn) {
    scanner := bufio.NewScanner(conn)
    for scanner.Scan() {
       line := scanner.Text()
-      fmt.Println(line)
+      log.Println(line)
       if i == 0 {
          tokens := strings.Fields(line)
          if  tokens[0] != "GET" {
@@ -78,6 +84,7 @@ func response(conn net.Conn, content []byte, mime string) {
 }
 
 func getFileByRoute(path string) ([]byte, string){
+   dirPath := ""
    path = path[1:]
    if path == "" {
       path = "index.html"
@@ -87,26 +94,38 @@ func getFileByRoute(path string) ([]byte, string){
          return make([]byte, 0), ""
       }
       if fileInfo.IsDir() {
+         dirPath = filepath.Base(path)
          path += "/index.html"
       }
    }
 
-   fmt.Println("Caminho:", path)
+   log.Println("Caminho:", path)
    mime := mime.TypeByExtension(filepath.Ext(path))
-   fmt.Println("Mime:",mime)
+   log.Println("Mime:",mime)
    data, err := ioutil.ReadFile(path)
-   if err != nil {
+   if err != nil && dirPath == "" {
       return make([]byte, 0), ""
+   } else if dirPath != "" {
+      files, _ := ioutil.ReadDir(dirPath)
+      // fmt.Println("dirPath:",dirPath)
+      htmlDirPage := fmt.Sprintf("<html><head><title>%s</title></head><body><h1>Directory: /%s</h1><ul>", dirPath, dirPath)
+      for _, f := range files {
+         fullpath := dirPath + "/" + f.Name()
+         log.Println("fullpath:", fullpath)
+         htmlDirPage += fmt.Sprintf("<li><a href=\"%s\">%s</a></li>", fullpath ,f.Name())
+      }
+      htmlDirPage += "</ul></body></html>"
+      data = []byte(htmlDirPage)
    }
    return data, mime
 }
 
 func writeError(conn net.Conn, errorCode int) {
    errorString := "HTTP/1.1 "
-   if errorCode == 500 {
-      errorString += "500 Internal Server Error"
-   } else if errorCode == 404 {
+   if errorCode == 404 {
       errorString += "404 Not Found"
+   } else {
+      errorString += "500 Internal Server Error"
    }
    errorString += "\r\n\r\n"
    fmt.Fprint(conn, errorString)
