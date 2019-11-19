@@ -1,16 +1,18 @@
 package main
 
-import "fmt"
-import "log"
-import "net"
-import "bufio"
-import "time"
-import "strings"
-import "io/ioutil"
-import "os"
-import "mime"
-import "path/filepath"
-import "sort"
+import (
+   "fmt"
+   "log"
+   "net"
+   "bufio"
+   "time"
+   "strings"
+   "io/ioutil"
+   "os"
+   "mime"
+   "path/filepath"
+   "sort"
+)
 
 func main() {
    port := ":8080"
@@ -66,7 +68,8 @@ func request(conn net.Conn) {
             writeError(conn, 404)
             break
          } else {
-            defer response(conn, file, mime)
+            response(conn, file, mime)
+            return
          }
       }
       if line == "" {
