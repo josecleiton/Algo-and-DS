@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             //"preLaunchTask": "compile and run",
-            "program": "${workspaceFolder}/velha",
+            "program": "${workspaceFolder}/a.out",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

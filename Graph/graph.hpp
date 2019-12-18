@@ -118,7 +118,7 @@ public:
         cout << "DFS (root: " << key << ")" << endl;
         dfsUtil(key);
         for(auto item: results) cout << item << " -> ";
-        cout << "/" << endl; 
+        cout << "/" << endl;
     }
 
     void bfs(ValueType key){
@@ -128,7 +128,7 @@ public:
         cout << "BFS (root: " << key << ")" << endl;
         bfsUtil(key);
         for(auto item: results) cout << item << " -> ";
-        cout << "/" << endl; 
+        cout << "/" << endl;
     }
 
     // void dikjstra(ValueType v1, ValueType v2)
@@ -200,7 +200,7 @@ public:
                 weighted_graph<ValueType>::adj_list[v1].erase(weighted_graph<ValueType>::adj_list[v1].begin()+i);
                 break;
             }
-            i++;  
+            i++;
         }
         if(exists){
             i=0;
@@ -209,15 +209,20 @@ public:
                     weighted_graph<ValueType>::adj_list[v2].erase(weighted_graph<ValueType>::adj_list[v2].begin()+i);
                     break;
                 }
-                i++;  
+                i++;
             }
         }
     }
 
+    // O(E + V*log(V))
     deque<ValueType> dijkstra(ValueType start, ValueType finish){
+       // heap auxiliar
         binary_tree::Heap<pair<int, ValueType>> priorityq;
+         // distances (inicialmente tudo infinito, menos source)
         map<ValueType, int> distances;
+        // mantenha a origem de cada nó
         map<ValueType, ValueType> previous;
+        // vetor dinamico para reconstruir o caminho minimo resultante
         deque<ValueType> result;
         for(auto vertex: weighted_graph<ValueType>::adj_list){
             previous[vertex.first];
@@ -253,7 +258,7 @@ public:
         cout << "BFS (root: " << key << ")" << endl;
         bfsUtil(key);
         for(auto v: results) cout << v << " -> ";
-        cout << "/" << endl; 
+        cout << "/" << endl;
     }
     void dfs(ValueType key){
         if(weighted_graph<ValueType>::adj_list.find(key) == weighted_graph<ValueType>::adj_list.end()) return;

@@ -39,12 +39,12 @@ func main() {
 }
 
 func handle(conn net.Conn, clientNumber int) {
+   defer conn.Close()
    err := conn.SetDeadline(time.Now().Add(10 * time.Second))
    if err != nil {
       log.Println("CONN TIMEOUT")
-
+      return;
    }
-   defer conn.Close()
    log.Println("")
    log.Printf("Lendo a requisição da conexão #%d:\n", clientNumber)
    request(conn)
@@ -107,7 +107,7 @@ func getFileByRoute(path string) ([]byte, string){
    log.Println("Caminho:", path)
    mime := mime.TypeByExtension(filepath.Ext(path))
    if mime == "" {
-      mime = "text/plain"
+      mime = "text/plain; charset=utf-8"
    }
    log.Println("Mime:",mime)
    data, err := ioutil.ReadFile(path)
