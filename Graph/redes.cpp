@@ -1,18 +1,21 @@
-#include "graph.hpp"
 #include <cctype>
+#include <cstring>
+#include <stack>
 #include <unordered_map>
 
-int main() {
+#include "graph.hpp"
+void backtrackPath(map<string, string>& pattern, const string node) {
+   if (node.size()) {
+      backtrackPath(pattern, pattern[node]);
+      cout << node << " -> ";
+   }
+};
+
+int main(int argc, char* argv[]) {
    graph::undirected_weigthed_graph<string> graph;
-   unordered_map<string, bool> tem {
-      {"RECIFE", 1},
-      {"SALVADOR", 1},
-      {"MACEIO", 1},
-      {"ARACAJU", 1},
-      {"FEIRA", 1},
-      {"MADRE", 1},
-      {"NATAL", 1},
-      {"CIDADENOVA", 1},
+   unordered_map<string, bool> tem{
+       {"RECIFE", 1}, {"SALVADOR", 1}, {"MACEIO", 1}, {"ARACAJU", 1},
+       {"FEIRA", 1},  {"MADRE", 1},    {"NATAL", 1},  {"CIDADENOVA", 1},
    };
    graph.addEdge("RECIFE", "MACEIO", 30);
    graph.addEdge("RECIFE", "ARACAJU", 10);
@@ -47,16 +50,33 @@ int main() {
    string ponto1, ponto2;
    cin >> ponto1 >> ponto2;
    auto toup = [](string& s) {
-      for(auto& c: s)
-         c = toupper(c);
+      for (auto& c : s) c = toupper(c);
    };
    toup(ponto1);
    toup(ponto2);
-   if(tem[ponto1] && tem[ponto2]) {
-      cout << endl << "A menor distancia entre {" << ponto1 << ", " << ponto2 << "}: " << endl;
-      auto shortestPath = graph.dijkstra(ponto1, ponto2);
-      for(const auto e: shortestPath) cout << e << " -> ";
-      cout << "/" << endl;
+   if (tem[ponto1] && tem[ponto2]) {
+      cout << endl
+           << "A menor distancia entre {" << ponto1 << ", " << ponto2
+           << "}: " << endl;
+      if (argc > 1 && !strcmp(argv[1], "bellman")) {
+         cout << "\nUSING BELLMAN-FORD ALGORITHM O(V*E):\n\n";
+         auto bellman = graph.bellmanFord(ponto1);
+         cout << "distances from " << ponto1 << ":\n";
+         for (const auto& distances : bellman.first) {
+            cout << distances.first << " -> " << distances.second << '\n';
+         }
+         cout << "\nback tracking the minimium path:\n";
+         {
+            auto pattern = bellman.second;
+            backtrackPath(pattern, ponto2);
+            cout << " /\n";
+         }
+      } else {
+         cout << "\nUSING DIJKSTRA ALGORITHM O((E+V)*logV):\n\n";
+         auto shortestPath = graph.dijkstra(ponto1, ponto2);
+         backtrackPath(shortestPath, ponto2);
+         cout << " /\n";
+      }
    } else {
       cout << endl << "Input inválido" << endl;
       return 1;
