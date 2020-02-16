@@ -17,22 +17,34 @@
  */
 
 #include <string>
-#include <string_view>
 
 class User {
-   private:
-      std::string cpf;
-   public:
-      std::string name;
-      int age;
+  private:
+   std::string cpf;
 
-      User(const std::string&, const std::string&, int = -1);
+  public:
+   std::string name;
+   int age;
 
-      inline std::string_view firstName(void) const {
+   User(const std::string&, const std::string&, int = -1);
+
+   inline const std::string& getCpf(void) const { return cpf; }
+
+   inline std::string_view firstName(void) const {
+      const auto space = name.find_first_of(' ');
+      if (space != std::string::npos) {
          return std::string_view(name.c_str(), name.find_first_of(' '));
       }
-      inline std::string_view lastName(void) const {
-         const auto space = name.find_first_of(' ');
-         return std::string_view(name.c_str()+space+1, name.size()-(space+1));
+      return name;
+   }
+   inline std::string_view lastName(void) const {
+      const auto space = name.find_first_of(' ');
+      if (space != std::string::npos) {
+         return std::string_view(name.c_str() + space + 1,
+                                 name.size() - (space + 1));
       }
+      return std::string_view(name.c_str() + name.size());
+   }
+
+   friend std::ostream& operator<<(std::ostream&, const User&);
 };

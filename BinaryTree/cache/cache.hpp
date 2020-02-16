@@ -21,7 +21,6 @@
 #include <map>
 #include <memory>
 #include <stdexcept>
-#include <string_view>
 #include <vector>
 
 template <typename T>
@@ -66,6 +65,8 @@ class Cache {
          return nullptr;
       }
    }
+
+   inline std::size_t size(void) const { return mHeap.size(); }
 
   private:
    unsigned cleanUp(const std::time_t now) {

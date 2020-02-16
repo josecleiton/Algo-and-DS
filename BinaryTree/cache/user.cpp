@@ -18,6 +18,12 @@
 
 #include "user.hpp"
 
+#include <iostream>
+
 User::User(const std::string& _cpf, const std::string& _name, int _age)
     : cpf(_cpf), name(_name), age(_age) {}
 
+std::ostream& operator<<(std::ostream& out, const User& u) {
+   out << "{cpf:" << u.cpf << ", name:" << u.name << "}";
+   return out;
+}
