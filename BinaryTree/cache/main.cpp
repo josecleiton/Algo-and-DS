@@ -25,11 +25,13 @@
 
 int main() {
    Cache<User> c(2, 3);
-   c.push(User("01203132", "José Cleiton"));
+   c.push(User("01203132", "José Cleiton"), "teste2");
    c.push(User("01203132", "Maria José"));
    c.push(User("01203132", "Ana Claudia"));
    c.push(User("01203132", "Ana Maria"));
-   c.push(User("01203132", "Ana Rita"));
+   c.push(User("01203132", "Ana Rita"), "teste");
+   std::cout << "KEY 'test': " << c.get("teste") << '\n';
+   std::cout << "KEY 'test2': " <<  c.get("cleiton") << '\n';
    return 0;
 }
 

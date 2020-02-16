@@ -18,8 +18,6 @@
 
 #include "user.hpp"
 
-
-User::User(const std::string& _cpf, const std::string& _name, int _age): cpf(_cpf), name(_name), age(_age) {
-   puts("Chamado");
-}
+User::User(const std::string& _cpf, const std::string& _name, int _age)
+    : cpf(_cpf), name(_name), age(_age) {}
 
