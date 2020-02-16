@@ -74,7 +74,7 @@ class Cache {
       if (key.size()) {
          mMap.erase(key);
       }
-      std::pop_heap(mHeap.begin(), mHeap.end());
+      std::pop_heap(mHeap.begin(), mHeap.end(), cmp<T>);
       mHeap.pop_back();
       if (now - root.first > mGap) {
          return cleanUp(now) + 1;

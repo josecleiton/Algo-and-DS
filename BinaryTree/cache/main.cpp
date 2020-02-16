@@ -21,10 +21,11 @@
 #include "cache.hpp"
 #include "user.hpp"
 
-#define MAX 300
+#define MAX 2
+#define GAP 3
 
 int main() {
-   Cache<User> c(2, 3);
+   Cache<User> c(MAX, GAP);
    c.push(User("01203132", "José Cleiton"), "teste2");
    c.push(User("01203132", "Maria José"));
    c.push(User("01203132", "Ana Claudia"));
