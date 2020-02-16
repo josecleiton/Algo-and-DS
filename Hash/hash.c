@@ -10,7 +10,7 @@ unsigned long hash(const char* in) {
    char* str = (char*)in;
    unsigned c;
    while ((c = *str++)) {
-       /* hash * 33 + c */
+      /* hash * 33 + c */
       hash = ((hash << 5) + hash) + c;
    }
    return hash;
@@ -23,35 +23,43 @@ BucketHash* bucketInit(const int length) {
    return h;
 }
 
-int bucketPush(BucketHash* h, const char* key, const char* value) {
+int bucketPush(BucketHash* h, const char* key, const BucketValue* v) {
    int idx = hash(key) % h->length;
-   return (h->size += bucketListPush(&h->heads[idx], key, value));
+   return (h->size += bucketListPush(&h->heads[idx], key, v));
 }
 
-int bucketListPush(BucketList** l, const char* key, const char* value) {
+int bucketListPush(BucketList** l, const char* key, const BucketValue* value) {
    BucketList* list = *l;
    if (list) {
       if (!strcmp(list->key, key)) {
-         const unsigned vcapacity = strlen(value) + 1;
-         if (list->vcapacity < vcapacity) {
-            list->vcapacity = vcapacity << 1;
-            list->value = (char*)realloc(list->value, list->vcapacity);
-            if (!list->value) {
-               abortWithLog(1);
-            }
-         }
-         strcpy(list->value, value);
+         bucketListValueAssign(&list->value, value);
          return 0;
       }
       return bucketListPush(&list->next, key, value);
    }
    list = *l = (BucketList*)alloc(1, sizeof(BucketList));
    list->key = (char*)alloc(strlen(key) + 1, sizeof(char));
-   list->vcapacity = strlen(value) + 1;
-   list->value = (char*)alloc(list->vcapacity, sizeof(char));
+   bucketListValueAssign(&list->value, value);
    strcpy(list->key, key);
-   strcpy(list->value, value);
    return 1;
+}
+
+void bucketListValueAssign(BucketValue* lv, const BucketValue* rv) {
+   const unsigned capacity = rv->capacity;
+   if (lv->capacity) {
+      if (lv->capacity < capacity) {
+         lv->capacity = capacity << 1;
+         lv->data = realloc(lv->data, lv->capacity);
+         if (!lv->data) {
+            abortWithLog(true);
+         }
+      }
+      memcpy(lv->data, rv->data, lv->capacity);
+   } else {
+      lv->data = alloc(capacity, 1);
+      lv->capacity = capacity;
+      memcpy(lv->data, rv->data, capacity);
+   }
 }
 
 int bucketPop(BucketHash* h, const char* key) {
@@ -96,15 +104,15 @@ BucketList* bucketListFree(BucketList* l) {
    return NULL;
 }
 
-const char* bucketFind(BucketHash* h, const char* key) {
+const BucketValue* bucketFind(BucketHash* h, const char* key) {
    int idx = hash(key) % h->length;
    return bucketListFind(h->heads[idx], key);
 }
 
-const char* bucketListFind(BucketList* list, const char* key) {
+const BucketValue* bucketListFind(BucketList* list, const char* key) {
    if (list) {
       if (!strcmp(list->key, key)) {
-         return list->value;
+         return &list->value;
       }
       return bucketListFind(list->next, key);
    }
@@ -113,25 +121,34 @@ const char* bucketListFind(BucketList* list, const char* key) {
 
 void bucketNodeListFree(BucketList* l) {
    free(l->key);
-   free(l->value);
+   free(l->value.data);
    free(l);
 }
 
 /* int main() { */
-/*    BucketHash* h= bucketInit(10); */
-/*    bucketPush(h, "test", "treme"); */
-/*    bucketPush(h, "italo", "treme"); */
-/*    bucketPush(h, "italo sergio", "treme"); */
-/*    bucketPush(h, "Rita", "burra"); */
-/*    bucketPush(h, "milena", "burra"); */
-/*    bucketPush(h, "milena", "inteligente"); */
+/*    BucketHash* h = bucketInit(10); */
+/*    BucketValue v; */
+/*    v.data = (void*)"test"; */
+/*    v.capacity = 6; */
+/*    bucketPush(h, "test", &v); */
+/*    v.data = (void*)"treme"; */
+/*    v.capacity = 6; */
+/*    bucketPush(h, "italo", &v); */
+/*    v.data = (void*)"burra"; */
+/*    v.capacity = 6; */
+/*    bucketPush(h, "Rita", &v); */
+/*    v.data = (void*)"inteligente"; */
+/*    v.capacity = 12; */
+/*    bucketPush(h, "milena", &v); */
+/*    v.data = (void*)"burra"; */
+/*    v.capacity = 6; */
+/*    bucketPush(h, "milena", &v); */
 /*    bucketPop(h, "Rita"); */
 /*    bucketPop(h, "italo sergio"); */
-/*    bucketPush(h, "test", "gotcha"); */
-/*    bucketPop(h, "milena"); */
-/*    const char* r = bucketFind(h, "milena"); */
-/*    if(r) { */
-/*       printf("milena = %s\n", r); */
+/*    /1* bucketPop(h, "milena"); *1/ */
+/*    const BucketValue* r = bucketFind(h, "milena"); */
+/*    if (r) { */
+/*       printf("milena = %s\n", (const char*)r->data); */
 /*    } else { */
 /*       puts("milena não está no dat"); */
 /*    } */

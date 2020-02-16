@@ -1,14 +1,21 @@
+#ifndef HASH_H
+#define HASH_H
+
+typedef struct bucket_value {
+   void* data;
+   unsigned capacity;
+} BucketValue;
+
 typedef struct bucket_list {
+   char* key;
+   BucketValue value;
    struct bucket_list* next;
-   unsigned length;
-   char *key, *value;
-   unsigned vcapacity;  // value capacity
 } BucketList;
 
 typedef struct bucket_hash {
    BucketList** heads;
-   unsigned length; // total de buckets alocados
-   unsigned size; // total de nós em todos os buckets
+   unsigned length;  // total de buckets alocados
+   unsigned size;    // total de nós em todos os buckets
 } BucketHash;
 
 /*
@@ -24,7 +31,7 @@ BucketHash* bucketInit(const int length);
 /*
  * Insere par de chave valor
  */
-int bucketPush(BucketHash* h, const char* key, const char* value);
+int bucketPush(BucketHash* h, const char* key, const BucketValue* value);
 
 /*
  * Remove chave
@@ -34,7 +41,7 @@ int bucketPop(BucketHash* h, const char* key);
 /*
  * Busca chave
  */
-const char* bucketFind(BucketHash* h, const char* key);
+const BucketValue* bucketFind(BucketHash* h, const char* key);
 
 /*
  * Libera memória de toda a estrutura de dados
@@ -49,13 +56,16 @@ void bucketFree(BucketHash**);
  * assim como seus nós
  */
 
-int bucketListPush(BucketList** list, const char* key, const char* value);
+int bucketListPush(BucketList** list, const char* key, const BucketValue* v);
+
+void bucketListValueAssign(BucketValue* toAssign, const BucketValue* value);
 
 BucketList* bucketListPop(BucketList** list, const char* key, int* removed);
 
 BucketList* bucketListFree(BucketList* list);
 
-const char* bucketListFind(BucketList* list, const char* key);
+const BucketValue* bucketListFind(BucketList* list, const char* key);
 
 void bucketNodeListFree(BucketList*);
 
+#endif
