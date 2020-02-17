@@ -24,18 +24,18 @@
 #include <vector>
 
 template <typename T>
-bool cmp(
-    const std::pair<std::time_t, std::pair<std::string, std::unique_ptr<T>>>& l,
-    const std::pair<std::time_t, std::pair<std::string, std::unique_ptr<T>>>&
-        r) {
-   return l.first >= r.first;
-}
-
-template <typename T>
 class Cache {
-   std::vector<
-       std::pair<std::time_t, std::pair<std::string, std::unique_ptr<T>>>>
-       mHeap;
+   struct Node {
+      std::time_t time;
+      std::string key;
+      std::unique_ptr<T> ptr;
+
+      Node(const std::time_t& t, const std::string& s, const T& obj)
+          : time(t), key(s), ptr(std::make_unique<T>(obj)) {}
+      constexpr bool operator>=(const Node& r) const { return time >= r.time; }
+   };
+
+   std::vector<Node> mHeap;
    std::map<std::string_view, T*> mMap;
    const std::size_t mMax;
    const std::time_t mGap;
@@ -48,13 +48,12 @@ class Cache {
       if (mHeap.size() + 1 > mMax) {
          cleanUp(std::time(nullptr));
       }
-      mHeap.emplace_back(std::make_pair(
-          std::time(nullptr), std::make_pair(key, std::make_unique<T>(obj))));
-      auto res = mHeap.back().second.second.get();
+      mHeap.emplace_back(Node(std::time(nullptr), key, obj));
+      auto res = mHeap.back().ptr.get();
       if (key.size()) {
          mMap[key] = res;
       }
-      std::push_heap(mHeap.begin(), mHeap.end(), cmp<T>);
+      std::push_heap(mHeap.begin(), mHeap.end(), std::greater_equal<Node>());
       return res;
    }
 
@@ -71,13 +70,13 @@ class Cache {
   private:
    unsigned cleanUp(const std::time_t now) {
       const auto& root = mHeap.front();
-      const auto& key = root.second.first;
+      const auto& key = root.key;
       if (key.size()) {
          mMap.erase(key);
       }
-      std::pop_heap(mHeap.begin(), mHeap.end(), cmp<T>);
+      std::pop_heap(mHeap.begin(), mHeap.end(), std::greater_equal<Node>());
       mHeap.pop_back();
-      if (now - root.first > mGap) {
+      if (now - root.time > mGap) {
          return cleanUp(now) + 1;
       }
       return 1;
